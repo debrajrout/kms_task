@@ -1,4 +1,3 @@
-// internal/crypto/aes.go
 package crypto
 
 import (
@@ -9,72 +8,59 @@ import (
 	"io"
 )
 
-// KeySize defines the size of the Data Encryption Key (DEK).
 const KeySize = 32 // 256 bits for AES-256
 
 // EncryptAES256GCM encrypts plaintext using AES-256-GCM with the provided key.
-// Returns the ciphertext which includes the nonce.
 func EncryptAES256GCM(key, plaintext []byte) ([]byte, error) {
-	// Create AES cipher block
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create AES cipher: %w", err)
 	}
 
-	// Create GCM cipher mode
-	aesGCM, err := cipher.NewGCM(block)
+	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GCM cipher: %w", err)
 	}
 
-	// Generate a random nonce
-	nonce := make([]byte, aesGCM.NonceSize())
+	nonce := make([]byte, gcm.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, fmt.Errorf("failed to generate nonce: %w", err)
 	}
 
-	// Encrypt the plaintext
-	ciphertext := aesGCM.Seal(nonce, nonce, plaintext, nil)
+	ciphertext := gcm.Seal(nonce, nonce, plaintext, nil)
 	return ciphertext, nil
 }
 
-// DecryptAES256GCM decrypts ciphertext using AES-256-GCM with the provided key.
-// Expects the nonce to be prepended to the ciphertext.
+// DecryptAES256GCM decrypts ciphertext (nonce + data) using AES-256-GCM with the provided key.
 func DecryptAES256GCM(key, ciphertext []byte) ([]byte, error) {
-	// Create AES cipher block
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create AES cipher: %w", err)
 	}
 
-	// Create GCM cipher mode
-	aesGCM, err := cipher.NewGCM(block)
+	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GCM cipher: %w", err)
 	}
 
-	nonceSize := aesGCM.NonceSize()
+	nonceSize := gcm.NonceSize()
 	if len(ciphertext) < nonceSize {
 		return nil, fmt.Errorf("ciphertext too short")
 	}
+	nonce, actualCipher := ciphertext[:nonceSize], ciphertext[nonceSize:]
 
-	// Extract nonce and actual ciphertext
-	nonce, actualCiphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-
-	// Decrypt the ciphertext
-	plaintext, err := aesGCM.Open(nil, nonce, actualCiphertext, nil)
+	plaintext, err := gcm.Open(nil, nonce, actualCipher, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt ciphertext: %w", err)
 	}
-
 	return plaintext, nil
 }
 
-// GenerateKey generates a new Data Encryption Key (DEK) using secure randomness.
+// GenerateKey creates a new 32-byte key for AES-256.
 func GenerateKey() ([]byte, error) {
-	dek := make([]byte, KeySize)
-	if _, err := rand.Read(dek); err != nil {
-		return nil, fmt.Errorf("failed to generate DEK: %w", err)
+	key := make([]byte, KeySize)
+	if _, err := rand.Read(key); err != nil {
+		return nil, fmt.Errorf("failed to generate key: %w", err)
 	}
-	return dek, nil
+	return key, nil
 }

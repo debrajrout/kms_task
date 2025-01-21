@@ -12,7 +12,7 @@ import (
 // User represents a user document in MongoDB.
 type User struct {
 	FirebaseUID string `bson:"firebaseUID"`
-	Role        string `bson:"role"` // "ADMIN", "SERVICE", "AUDITOR"
+	Role        string `bson:"role"` // "ADMIN", "SERVICE", "AUDITOR", etc.
 }
 
 // MongoUserStore handles user data retrieval from MongoDB.
@@ -29,7 +29,6 @@ func NewMongoUserStore(uri, dbName, collectionName string) (*MongoUserStore, err
 		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
 
-	// Ping the database to verify connection
 	if err := client.Ping(context.Background(), nil); err != nil {
 		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
 	}
@@ -40,6 +39,20 @@ func NewMongoUserStore(uri, dbName, collectionName string) (*MongoUserStore, err
 		collection: collection,
 	}, nil
 }
+
+// GetUserByFirebaseUID retrieves a user by their Firebase UID.
+// func (m *MongoUserStore) GetUserByFirebaseUID(ctx context.Context, uid string) (*User, error) {
+// 	var user User
+// 	filter := bson.M{"firebaseUID": uid}
+// 	err := m.collection.FindOne(ctx, filter).Decode(&user)
+// 	if err != nil {
+// 		if err == mongo.ErrNoDocuments {
+// 			return nil, fmt.Errorf("no user found with Firebase UID %s", uid)
+// 		}
+// 		return nil, fmt.Errorf("error retrieving user: %w", err)
+// 	}
+// 	return &user, nil
+// }
 
 // GetUserByFirebaseUID retrieves a user by their Firebase UID.
 func (m *MongoUserStore) GetUserByFirebaseUID(ctx context.Context, uid string) (*User, error) {

@@ -1,4 +1,3 @@
-// internal/config/config.go
 package config
 
 import (
@@ -26,35 +25,37 @@ type Config struct {
 	MasterKeys                 string `envconfig:"MASTER_KEYS" required:"true"` // Comma-separated: id:base64key
 	TLSCertPath                string `envconfig:"TLS_CERT_PATH" required:"true"`
 	TLSKeyPath                 string `envconfig:"TLS_KEY_PATH" required:"true"`
+
+	// New field for storing Data Encryption Keys
+	MongoDEKCollection string `envconfig:"MONGO_DEK_COLLECTION" required:"true"`
 }
 
 // LoadConfig loads configuration from a .env file and environment variables.
 func LoadConfig() (*Config, error) {
 	// Load .env file if it exists
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("No .env file found, relying on environment variables")
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("No .env file found, relying on environment variables...")
 	}
 
 	var cfg Config
-	err = envconfig.Process("", &cfg)
+	err := envconfig.Process("", &cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to process environment variables: %w", err)
 	}
 	return &cfg, nil
 }
 
-// ParseMasterKeys parses the MASTER_KEYS environment variable into a slice of MasterKey.
+// ParseMasterKeys parses the MASTER_KEYS string into a slice of MasterKey.
 func (cfg *Config) ParseMasterKeys() ([]MasterKey, error) {
+	parts := strings.Split(cfg.MasterKeys, ",")
 	var masterKeys []MasterKey
-	keys := strings.Split(cfg.MasterKeys, ",")
-	for _, key := range keys {
-		parts := strings.SplitN(key, ":", 2)
-		if len(parts) != 2 {
+	for _, p := range parts {
+		kv := strings.SplitN(p, ":", 2)
+		if len(kv) != 2 {
 			return nil, errors.New("invalid MASTER_KEYS format; expected id:base64key")
 		}
-		id := parts[0]
-		keyBytes, err := base64.StdEncoding.DecodeString(parts[1])
+		id := kv[0]
+		keyBytes, err := base64.StdEncoding.DecodeString(kv[1])
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode base64 key for ID %s: %w", id, err)
 		}
