@@ -10,29 +10,24 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-// MasterKey represents a master key with an ID and the key bytes.
 type MasterKey struct {
 	ID  string
 	Key []byte
 }
 
-// Config holds the configuration variables.
 type Config struct {
 	MongoURI                   string `envconfig:"MONGO_URI" required:"true"`
 	MongoDBName                string `envconfig:"MONGO_DB_NAME" required:"true"`
 	MongoUsersCollection       string `envconfig:"MONGO_USERS_COLLECTION" required:"true"`
 	FirebaseServiceAccountPath string `envconfig:"FIREBASE_SERVICE_ACCOUNT_PATH" required:"true"`
-	MasterKeys                 string `envconfig:"MASTER_KEYS" required:"true"` // Comma-separated: id:base64key
+	MasterKeys                 string `envconfig:"MASTER_KEYS" required:"true"`
 	TLSCertPath                string `envconfig:"TLS_CERT_PATH" required:"true"`
 	TLSKeyPath                 string `envconfig:"TLS_KEY_PATH" required:"true"`
-
-	// New field for storing Data Encryption Keys
-	MongoDEKCollection string `envconfig:"MONGO_DEK_COLLECTION" required:"true"`
+	MongoDEKCollection         string `envconfig:"MONGO_DEK_COLLECTION" required:"true"`
 }
 
-// LoadConfig loads configuration from a .env file and environment variables.
 func LoadConfig() (*Config, error) {
-	// Load .env file if it exists
+
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("No .env file found, relying on environment variables...")
 	}
@@ -45,7 +40,6 @@ func LoadConfig() (*Config, error) {
 	return &cfg, nil
 }
 
-// ParseMasterKeys parses the MASTER_KEYS string into a slice of MasterKey.
 func (cfg *Config) ParseMasterKeys() ([]MasterKey, error) {
 	parts := strings.Split(cfg.MasterKeys, ",")
 	var masterKeys []MasterKey

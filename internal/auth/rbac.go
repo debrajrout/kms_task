@@ -19,9 +19,6 @@ const (
 	ActionEncrypt         Action = "ENCRYPT"
 	ActionDecrypt         Action = "DECRYPT"
 	ActionRotateMasterKey Action = "ROTATE_MASTER_KEY"
-
-	// If you want an explicit "DELETE_DATA_KEY" action:
-	// ActionDeleteDataKey Action = "DELETE_DATA_KEY"
 )
 
 // Identity is placed in request context

@@ -41,20 +41,6 @@ func NewMongoUserStore(uri, dbName, collectionName string) (*MongoUserStore, err
 }
 
 // GetUserByFirebaseUID retrieves a user by their Firebase UID.
-// func (m *MongoUserStore) GetUserByFirebaseUID(ctx context.Context, uid string) (*User, error) {
-// 	var user User
-// 	filter := bson.M{"firebaseUID": uid}
-// 	err := m.collection.FindOne(ctx, filter).Decode(&user)
-// 	if err != nil {
-// 		if err == mongo.ErrNoDocuments {
-// 			return nil, fmt.Errorf("no user found with Firebase UID %s", uid)
-// 		}
-// 		return nil, fmt.Errorf("error retrieving user: %w", err)
-// 	}
-// 	return &user, nil
-// }
-
-// GetUserByFirebaseUID retrieves a user by their Firebase UID.
 func (m *MongoUserStore) GetUserByFirebaseUID(ctx context.Context, uid string) (*User, error) {
 	var user User
 	filter := bson.M{"firebaseId": uid}
