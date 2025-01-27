@@ -1,4 +1,3 @@
-// internal/server/firebase_middleware.go
 package server
 
 import (
@@ -7,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	// Aliased
 	"my-kms/internal/auth"
 )
 

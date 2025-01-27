@@ -12,7 +12,7 @@ import (
 // User represents a user document in MongoDB.
 type User struct {
 	FirebaseUID string `bson:"firebaseUID"`
-	Role        string `bson:"role"` // "ADMIN", "SERVICE", "AUDITOR", etc.
+	Role        string `bson:"role"`
 }
 
 // MongoUserStore handles user data retrieval from MongoDB.
